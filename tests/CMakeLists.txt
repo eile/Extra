@@ -2,4 +2,5 @@
 #                        Stefan.Eilemann@epfl.ch
 # Change this number when adding tests to force a CMake run: 0
 
-set(TEST_LIBRARIES ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} Hello)
+extra_test(clock SOURCES clock.cpp LIBRARIES ${BUT_LIB} Extra)
+extra_test(mtQueue SOURCES mtQueue.cpp LIBRARIES ${BUT_LIB} Extra)
