@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <extra/clock.h>
-#include <extra/mtQueue.h>
+#include <extra/Clock.h>
+#include <extra/MTQueue.h>
 #include <iostream>
 #include <thread>
 

@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <extra/clock.h>
+#include <extra/Clock.h>
 #include <extra/sleep.h>
 
 #define BOOST_TEST_MODULE Clock

@@ -20,12 +20,10 @@
 
 #pragma once
 
-#include <algorithm>
 #include <condition_variable>
 #include <limits.h>
 #include <mutex>
 #include <queue>
-#include <string.h>
 
 namespace extra
 {

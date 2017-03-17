@@ -3,13 +3,13 @@
 
 extra_library(Extra
   PUBLIC_HEADERS
-    clock.h
-    mtQueue.h
-    mtQueue.ipp
+    Clock.h
+    MTQueue.h
+    MTQueue.ipp
     sleep.h
     time.h
     types.h
   SOURCES
-    clock.cpp
+    Clock.cpp
     sleep.cpp
   )

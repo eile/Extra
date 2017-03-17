@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "clock.h"
+#include "Clock.h"
 
 #ifdef __APPLE__
 // http://developer.apple.com/qa/qa2004/qa1398.html
