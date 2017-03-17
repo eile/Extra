@@ -17,3 +17,4 @@ find_package(Boost QUIET COMPONENTS unit_test_framework)
 
 add_subdirectory(extra)
 add_subdirectory(tests)
+extra_export_project()

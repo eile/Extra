@@ -1,6 +1,14 @@
 # Copyright (c) BBP/EPFL 2017
 #                        Stefan.Eilemann@epfl.ch
+#
+# Minimal CMake setup. This file is intended to be checked in to the
+# repository and contains all the code to compile, install a project, and
+# use it as a subproject. It will eventually load an optional CMake/common
+# to augment it with flags and targets for developers working on the
+# project. See functions below for more documentation.
 
+
+include(CMakePackageConfigHelpers)
 include(CMakeParseArguments)
 include(GenerateExportHeader)
 
@@ -25,6 +33,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON) # value of CXX_STANDARD on targets is requir
 set_property(GLOBAL PROPERTY USE_FOLDERS ON) # organize targets into folders
 enable_testing()
 
+# Create and install a C++11 library with code or header only:
+#  extra_library(Name PUBLIC_HEADERS <files> HEADERS <files> SOURCES <files>
+#                PUBLIC_LIBRARIES <targets|files>
+#                PRIVATE_LIBRARIES <targets|files>)
 function(extra_library Name)
   set(_opts)
   set(_singleArgs)
@@ -54,7 +66,7 @@ function(extra_library Name)
     target_include_directories(${Name} PUBLIC
       "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>"
       "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>")
-      set_property(TARGET ${Name} PROPERTY CXX_STANDARD 11)
+    set_property(TARGET ${Name} PROPERTY CXX_STANDARD 11)
   else()
     add_library(${Name} INTERFACE)
   endif()
@@ -71,6 +83,32 @@ function(extra_library Name)
   endforeach()
 endfunction()
 
+# Create and install an application:
+#  extra_application(Name SOURCES <files> LIBRARIES <targets|files>)
+function(extra_application Name)
+  set(_opts)
+  set(_singleArgs)
+  set(_multiArgs SOURCES LIBRARIES)
+  cmake_parse_arguments(THIS "${_opts}" "${_singleArgs}" "${_multiArgs}"
+    ${ARGN})
+  foreach(_multiArg ${_multiArgs})
+    if(THIS_${_multiArg})
+      list(SORT THIS_${_multiArg})
+    endif()
+  endforeach()
+
+    add_executable(${Name} ${THIS_SOURCES})
+    target_link_libraries(${Name} ${THIS_LIBRARIES})
+    target_include_directories(${Name} PRIVATE
+      "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>"
+      "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>")
+    set_property(TARGET ${Name} PROPERTY CXX_STANDARD 11)
+
+  install(TARGETS ${Name} DESTINATION bin)
+endfunction()
+
+# Create and add a test:
+#  extra_test(Name SOURCES <files> LIBRARIES <targets|files>)
 function(extra_test Name)
   if(NOT Boost_UNIT_TEST_FRAMEWORK_LIBRARY)
     return()
@@ -103,4 +141,37 @@ function(extra_test Name)
   add_test(NAME ${Name}
     COMMAND $<TARGET_FILE:${Name}>
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+endfunction()
+
+# Create and install the exports to use this project in another CMake project
+function(extra_export_project)
+  if(MSVC)
+    set(CMAKE_MODULE_INSTALL_PATH ${PROJECT_NAME}/CMake)
+  else()
+    set(CMAKE_MODULE_INSTALL_PATH share/${PROJECT_NAME}/CMake)
+  endif()
+
+  write_basic_package_version_file(
+    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    COMPATIBILITY SameMajorVersion)
+
+  file(WRITE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake.in
+    "if(NOT TARGET @PROJECT_NAME@)
+      include(${PROJECT_BINARY_DIR}/@PROJECT_NAME@Targets.cmake)
+    endif()")
+
+  configure_package_config_file(
+    ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake.in
+    ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    INSTALL_DESTINATION ${CMAKE_MODULE_INSTALL_PATH})
+
+  install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+          DESTINATION ${CMAKE_MODULE_INSTALL_PATH})
+
+  export(EXPORT ${PROJECT_NAME}Targets
+    FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
+
+  install(EXPORT ${PROJECT_NAME}Targets FILE ${PROJECT_NAME}Targets.cmake
+          DESTINATION ${CMAKE_MODULE_INSTALL_PATH})
 endfunction()
