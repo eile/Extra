@@ -214,4 +214,4 @@ private:
 };
 }
 
-#include "mtQueue.ipp" // template implementation
+#include "MTQueue.ipp" // template implementation
